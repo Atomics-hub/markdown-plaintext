@@ -135,6 +135,34 @@ table does not cover, CommonMark is right and this is a simplification.
 In particular: it does not render, it produces no HTML, it does not preserve exact spacing between
 blocks, and it does not attempt list renumbering or nested-list indentation.
 
+## Replacing `remove-markdown`
+
+One thing to check before swapping. If your pipeline strips code *after* converting, like this:
+
+```js
+let content = removeMd(raw);
+content = content.replace(/```[\s\S]*?```/g, '');   // no longer matches anything
+content = content.replace(/`[^`]+`/g, '');
+```
+
+move the code-stripping *before* the conversion:
+
+```js
+const withoutCode = raw
+  .replace(/^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?^ {0,3}\1[^\n]*$/gm, '')
+  .replace(/`[^`\n]+`/g, '');
+const content = toText(withoutCode);
+```
+
+Every converter removes fence markers, so a regex looking for ` ``` ` after conversion has nothing
+to match. `remove-markdown` appears to get away with it only because it mangles the code into
+something unrecognisable — and that mangled code still reaches your index. Because this package keeps
+code intact, leaving the ordering alone means *all* of it reaches your index instead.
+
+Measured on one real consumer's search-index pipeline over 18 documentation files, counting fragments
+that still look like source code: 183 as shipped, 504 with the converter swapped and the ordering
+left alone, 71 with the code stripped first.
+
 ## Alternatives
 
 - [`remove-markdown`](https://www.npmjs.com/package/remove-markdown) — regex-based, zero
