@@ -68,7 +68,8 @@ of each shape:
 | `[a](b` repeated | 626.8 ms | 2,187.5 ms | **1.8 ms** |
 
 Nothing here backtracks, and once a scan proves no bracket closes beyond a point, later brackets stop
-looking. The test suite asserts that doubling the input does not multiply the time.
+looking. The test suite grows each of these shapes eightfold and asserts the time grows with it
+rather than with its square.
 
 ## Install
 

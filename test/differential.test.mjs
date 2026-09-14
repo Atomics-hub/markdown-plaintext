@@ -109,7 +109,13 @@ test('front matter, BOM and line endings do not change the text', () => {
 
 test('adversarial input stays linear', () => {
   // remove-markdown carries an open ReDoS advisory and an open issue about quadratic runtime on
-  // delimiter-heavy input. Doubling the input must not much more than double the time.
+  // delimiter-heavy input.
+  //
+  // Growing the input eightfold is the measurement, not doubling it: linear work costs 8x and
+  // quadratic work costs 64x, so the two are far enough apart to tell without a knife-edge
+  // threshold. Each timing is the best of several runs, because the minimum is the one estimate a
+  // garbage collection pause cannot inflate, and the slack term stops a baseline too small to
+  // measure from turning scheduler noise into a ratio.
   const shapes = {
     'unmatched brackets': (n) => '['.repeat(n),
     'unmatched parentheses': (n) => '[a](b'.repeat(n),
@@ -118,19 +124,23 @@ test('adversarial input stays linear', () => {
     'alternating brackets': (n) => '[a]'.repeat(n),
     'nested emphasis': (n) => '*'.repeat(n) + 'text' + '*'.repeat(n),
   };
-  for (const [name, build] of Object.entries(shapes)) {
-    const small = build(8000);
-    const large = build(16000);
-    const time = (input) => {
+  const best = (input) => {
+    let ms = Infinity;
+    for (let run = 0; run < 5; run++) {
       const started = process.hrtime.bigint();
       toText(input);
-      return Number(process.hrtime.bigint() - started) / 1e6;
-    };
-    time(small);
-    const a = Math.max(time(small), 0.05);
-    const b = time(large);
-    assert.ok(b < 400, `${name}: 16k units took ${b.toFixed(1)} ms`);
-    assert.ok(b / a < 12, `${name}: doubling the input multiplied the time by ${(b / a).toFixed(1)}`);
+      ms = Math.min(ms, Number(process.hrtime.bigint() - started) / 1e6);
+    }
+    return ms;
+  };
+  for (const [name, build] of Object.entries(shapes)) {
+    const small = build(8000);
+    const large = build(64000);
+    best(small);
+    const a = best(small);
+    const b = best(large);
+    assert.ok(b < 400, `${name}: 64k units took ${b.toFixed(1)} ms`);
+    assert.ok(b < a * 24 + 20, `${name}: eightfold input multiplied the time by ${(b / a).toFixed(1)}`);
   }
 });
 
