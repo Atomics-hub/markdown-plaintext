@@ -1,0 +1,41 @@
+{
+  "name": "markdown-plaintext",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Turn markdown into plain text without destroying the text: code blocks, escapes, entities and autolinks all survive. Zero dependencies.",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {"types": "./dist/index.d.mts", "default": "./dist/index.mjs"},
+      "require": {"types": "./dist/index.d.cts", "default": "./dist/index.cjs"}
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "engines": {"node": ">=18"},
+  "license": "MIT",
+  "author": "Tom Ryan",
+  "keywords": ["markdown", "plaintext", "plain-text", "strip", "text-extraction", "search", "embeddings", "rag", "commonmark", "zero-dependency"],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/api.test.mjs test/differential.test.mjs",
+    "test:types": "tsc -p test/tsconfig.json",
+    "test:pack": "node scripts/test-pack.mjs",
+    "verify": "npm run build && npm test && npm run test:types && npm run test:pack",
+    "bench": "node bench/bench.mjs",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run verify"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "unified": "^11.0.5",
+    "remark-parse": "^11.0.0",
+    "remark-gfm": "^4.0.0"
+  },
+  "publishConfig": {"access": "public", "registry": "https://registry.npmjs.org/"},
+  "repository": {"type": "git", "url": "git+https://github.com/Atomics-hub/markdown-plaintext.git"},
+  "homepage": "https://github.com/Atomics-hub/markdown-plaintext#readme",
+  "bugs": {"url": "https://github.com/Atomics-hub/markdown-plaintext/issues"}
+}
