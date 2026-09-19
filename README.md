@@ -2,6 +2,9 @@
 
 Turn markdown into plain text without destroying the text. Zero dependencies.
 
+**Is `remove-markdown` leaving markup behind, or eating your text?** That is the failure this exists
+for. It works by regular expression, so nested and adjacent constructs come out wrong.
+
 ```js
 import {toText} from 'markdown-plaintext';
 
@@ -179,3 +182,9 @@ left alone, 71 with the code stripped first.
 ## Licence
 
 MIT
+
+---
+
+Part of a set of measured defects in widely used npm packages — the full list is at
+[tomryan.dev/silent-defects](https://tomryan.dev/silent-defects/), and `npx silent-defects` checks
+your own dependencies against it.
